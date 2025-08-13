@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useState } from "react";
 import { Textarea } from "./components/ui/textarea";
 import { Button } from "./components/ui/button";
 import {
@@ -9,24 +8,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { translateText } from "../services/translation";
 
 function App() {
   const [englishText, setEnglishText] = useState("");
-  const [language, setLanguage] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [translatedText, setTranslatedText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const fetchAPI = async () => {
-    const response = await axios.get("http://localhost:3000/api");
-    console.log(response.data.message);
-  };
-
-  useEffect(() => {
-    fetchAPI();
-  }, []);
-
-  function handleTranslate(e) {
+  async function handleTranslate(e) {
     e.preventDefault();
-    console.log(englishText);
-    console.log(language);
+    setError("");
+
+    if (!englishText.trim()) {
+      setError("Please enter text to translate.");
+      return;
+    }
+    if (!selectedLanguage) {
+      setError("Please select a language.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const data = await translateText(englishText, selectedLanguage);
+      if (data == null) {
+        setError("Translation failed. Please try again.");
+        return;
+      }
+      setTranslatedText(data);
+    } catch {
+      setError("Unexpected error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -37,7 +53,7 @@ function App() {
         value={englishText}
         onChange={(e) => setEnglishText(e.target.value)}
       ></Textarea>
-      <Select value={language} onValueChange={setLanguage}>
+      <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
         <SelectTrigger>
           <SelectValue placeholder="Select a language" />
         </SelectTrigger>
@@ -49,8 +65,15 @@ function App() {
           <SelectItem value="Italian">Italian</SelectItem>
         </SelectContent>
       </Select>
-      <Button onClick={handleTranslate}>Translate</Button>
-      <Textarea placeholder="Translated text"></Textarea>
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      <Button type="submit" disabled={loading}>
+        {loading ? "Translating..." : "Translate"}
+      </Button>
+      <Textarea
+        placeholder="Translated text"
+        value={translatedText}
+        readOnly
+      ></Textarea>
     </form>
   );
 }

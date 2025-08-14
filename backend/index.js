@@ -24,7 +24,7 @@ app.use(express.json())
 
 app.post('/api/translate', async (req, res) => {
   try {
-    const { text, language } = req.body || {}
+    const { text, language } = req.body 
 
     if (typeof text !== 'string' || !text.trim()) {
       return res.status(400).json({ error: 'Text is required' })
@@ -49,7 +49,7 @@ app.post('/api/translate', async (req, res) => {
           content: `Translate the following text to ${language}: ${text}. Include pronunciation of the text in the response.`,
         },
       ],
-      temperature: 0.4,
+      temperature: 0.1,
       max_tokens: 100,
 });
 

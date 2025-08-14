@@ -46,12 +46,16 @@ function App() {
   }
 
   return (
-    <form onSubmit={handleTranslate}>
-      <h1>AI Translator App</h1>
+    <form
+      onSubmit={handleTranslate}
+      className="flex flex-col gap-4 justify-center content-center p-20"
+    >
+      <h1 className="text-4xl font-bold text-center">AI Translator App</h1>
       <Textarea
         placeholder="Enter text to translate"
         value={englishText}
         onChange={(e) => setEnglishText(e.target.value)}
+        className="p-5"
       ></Textarea>
       <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
         <SelectTrigger>
@@ -73,6 +77,7 @@ function App() {
         placeholder="Translated text"
         value={translatedText}
         readOnly
+        className="p-5"
       ></Textarea>
     </form>
   );

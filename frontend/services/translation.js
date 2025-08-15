@@ -7,15 +7,17 @@ const client = axios.create({
   timeout: 10000,
 });
 
+
 export const translateText = async (text, language) => {
   try {
-    const response = await client.post("/api/translate", {
-      text,
-      language,
-    });
-    return response.data.translatedText; // return translated text from English
+    const response = await client.post("/api/translate", { text, language });
+    return { data: response.data.translatedText, error: null };
   } catch (error) {
-    console.error("Translation error:", error);
-    return null;
+    console.log(error)
+    const msg =
+      error.response?.data?.error || 
+      error.message || 
+      "Unknown error";
+    return { data: null, error: msg };
   }
 };

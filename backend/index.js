@@ -1,11 +1,20 @@
 require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
+const { rateLimit } = require('express-rate-limit')
 const OpenAI = require('openai')
 
 // Config
 const PORT = 3000
 const MODEL = 'gpt-3.5-turbo'
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	limit: 50, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+  message: { error: 'Too many translation requests. Try again later.' },
+	standardHeaders: true, 
+	legacyHeaders: false, 
+	ipv6Subnet: 56, 
+})
 
 if (!process.env.OPENAI_API_KEY) {
   console.error('Missing OPENAI_API_KEY in environment')
@@ -20,9 +29,11 @@ const corsOptions = {
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
 app.use(cors(corsOptions))
-app.use(express.json())
+app.use(express.json({
+  limit: '1mb'
+}))
 
-app.post('/api/translate', async (req, res) => {
+app.post('/api/translate', limiter, async (req, res) => {
   try {
     const { text, language } = req.body 
 
@@ -46,7 +57,7 @@ app.post('/api/translate', async (req, res) => {
         },
         {
           role: 'user',
-          content: `Translate the following text to ${language}: ${text}. Include pronunciation of the text in the response.`,
+          content: `Translate the following text to ${language}: ${text}. Include pronunciation of the text in the response using the English alphabet.`,
         },
       ],
       temperature: 0.1,

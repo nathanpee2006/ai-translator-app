@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Textarea } from "./components/ui/textarea";
-import { Button } from "./components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -19,6 +19,7 @@ function App() {
 
   async function handleTranslate(e) {
     e.preventDefault();
+    setTranslatedText("");
     setError("");
 
     if (!englishText.trim()) {
@@ -32,9 +33,12 @@ function App() {
 
     try {
       setLoading(true);
-      const data = await translateText(englishText, selectedLanguage);
-      if (data == null) {
-        setError("Translation failed. Please try again.");
+      const { data, error } = await translateText(
+        englishText,
+        selectedLanguage
+      );
+      if (error || data === null) {
+        setError(error);
         return;
       }
       setTranslatedText(data);
